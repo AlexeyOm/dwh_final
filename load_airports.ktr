@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transformation>
   <info>
-    <name>load_tariffs</name>
+    <name>load_airports</name>
     <description/>
     <extended_description/>
     <trans_version/>
@@ -490,17 +490,37 @@
   <order>
     <hop>
       <from>Чтение из таблицы</from>
-      <to>Название тарифа не пусто</to>
+      <to>Временная зона не пуста</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>Название тарифа не пусто</from>
+      <from>Временная зона не пуста</from>
+      <to>Название аэропорта не пусто</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Временная зона не пуста</from>
       <to>Text file output</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>Название тарифа не пусто</from>
+      <from>Название аэропорта не пусто</from>
+      <to>Text file output</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Название аэропорта не пусто</from>
+      <to>Широта и долгота в рамках мировых координат</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Широта и долгота в рамках мировых координат</from>
       <to>Запись в таблицу</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Широта и долгота в рамках мировых координат</from>
+      <to>Text file output</to>
       <enabled>Y</enabled>
     </hop>
   </order>
@@ -529,7 +549,7 @@
     <fileNameField/>
     <create_parent_folder>Y</create_parent_folder>
     <file>
-      <name>${Internal.Entry.Current.Directory}/tariff_errors</name>
+      <name>${Internal.Entry.Current.Directory}/airports_errors</name>
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>N</do_not_open_new_file_init>
       <extention>csv</extention>
@@ -598,6 +618,41 @@
     </GUI>
   </step>
   <step>
+    <name>Временная зона не пуста</name>
+    <type>FilterRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <send_true_to>Название аэропорта не пусто</send_true_to>
+    <send_false_to>Text file output</send_false_to>
+    <compare>
+      <condition>
+        <negated>N</negated>
+        <leftvalue>timezone</leftvalue>
+        <function>IS NOT NULL</function>
+        <rightvalue/>
+      </condition>
+    </compare>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>240</xloc>
+      <yloc>256</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
     <name>Запись в таблицу</name>
     <type>TableOutput</type>
     <description/>
@@ -610,7 +665,7 @@
     </partitioning>
     <connection>localhost</connection>
     <schema>bookings</schema>
-    <table>dim_aircrafts</table>
+    <table>dim_passengers</table>
     <commit>1000</commit>
     <truncate>Y</truncate>
     <ignore_errors>N</ignore_errors>
@@ -627,16 +682,20 @@
     <return_field/>
     <fields>
       <field>
-        <column_name>model</column_name>
-        <stream_name>model</stream_name>
+        <column_name>document_number</column_name>
+        <stream_name>passenger_id</stream_name>
       </field>
       <field>
-        <column_name>range</column_name>
-        <stream_name>range</stream_name>
+        <column_name>name</column_name>
+        <stream_name>passenger_name</stream_name>
       </field>
       <field>
-        <column_name>id</column_name>
-        <stream_name>aircraft_code</stream_name>
+        <column_name>email</column_name>
+        <stream_name>email</stream_name>
+      </field>
+      <field>
+        <column_name>phone</column_name>
+        <stream_name>phone</stream_name>
       </field>
     </fields>
     <attributes/>
@@ -654,7 +713,7 @@
     </GUI>
   </step>
   <step>
-    <name>Название тарифа не пусто</name>
+    <name>Название аэропорта не пусто</name>
     <type>FilterRows</type>
     <description/>
     <distribute>Y</distribute>
@@ -664,12 +723,12 @@
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <send_true_to>Запись в таблицу</send_true_to>
+    <send_true_to>Широта и долгота в рамках мировых координат</send_true_to>
     <send_false_to>Text file output</send_false_to>
     <compare>
       <condition>
         <negated>N</negated>
-        <leftvalue>fare_conditions</leftvalue>
+        <leftvalue>airport_name</leftvalue>
         <function>IS NOT NULL</function>
         <rightvalue/>
       </condition>
@@ -683,8 +742,8 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>432</xloc>
-      <yloc>256</yloc>
+      <xloc>384</xloc>
+      <yloc>288</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
@@ -700,8 +759,9 @@
       <schema_name/>
     </partitioning>
     <connection>localhost</connection>
-    <sql>select distinct fare_conditions
-from bookings.ticket_flights</sql>
+    <sql>select
+*
+from bookings.airports</sql>
     <limit>0</limit>
     <lookup/>
     <execute_each_row>N</execute_each_row>
@@ -712,11 +772,11 @@ from bookings.ticket_flights</sql>
       <value-meta>
         <type>String</type>
         <storagetype>normal</storagetype>
-        <name>aircraft_code</name>
+        <name>airport_code</name>
         <length>3</length>
         <precision>-1</precision>
         <origin>Чтение из таблицы</origin>
-        <comments>aircraft_code</comments>
+        <comments>airport_code</comments>
         <conversion_Mask/>
         <decimal_symbol>,</decimal_symbol>
         <grouping_symbol> </grouping_symbol>
@@ -735,11 +795,11 @@ from bookings.ticket_flights</sql>
       <value-meta>
         <type>String</type>
         <storagetype>normal</storagetype>
-        <name>model</name>
+        <name>airport_name</name>
         <length>2147483647</length>
         <precision>-1</precision>
         <origin>Чтение из таблицы</origin>
-        <comments>model</comments>
+        <comments>airport_name</comments>
         <conversion_Mask/>
         <decimal_symbol>,</decimal_symbol>
         <grouping_symbol> </grouping_symbol>
@@ -756,14 +816,83 @@ from bookings.ticket_flights</sql>
         <lenient_string_to_number>N</lenient_string_to_number>
       </value-meta>
       <value-meta>
-        <type>Integer</type>
+        <type>String</type>
         <storagetype>normal</storagetype>
-        <name>range</name>
-        <length>9</length>
-        <precision>0</precision>
+        <name>city</name>
+        <length>2147483647</length>
+        <precision>-1</precision>
         <origin>Чтение из таблицы</origin>
-        <comments>range</comments>
-        <conversion_Mask>####0;-####0</conversion_Mask>
+        <comments>city</comments>
+        <conversion_Mask/>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol> </grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>ru_RU</date_format_locale>
+        <date_format_timezone>Europe/Moscow</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+      <value-meta>
+        <type>Number</type>
+        <storagetype>normal</storagetype>
+        <name>longitude</name>
+        <length>-1</length>
+        <precision>-1</precision>
+        <origin>Чтение из таблицы</origin>
+        <comments>longitude</comments>
+        <conversion_Mask>####0.0#########;-####0.0#########</conversion_Mask>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol> </grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>ru_RU</date_format_locale>
+        <date_format_timezone>Europe/Moscow</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+      <value-meta>
+        <type>Number</type>
+        <storagetype>normal</storagetype>
+        <name>latitude</name>
+        <length>-1</length>
+        <precision>-1</precision>
+        <origin>Чтение из таблицы</origin>
+        <comments>latitude</comments>
+        <conversion_Mask>####0.0#########;-####0.0#########</conversion_Mask>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol> </grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>ru_RU</date_format_locale>
+        <date_format_timezone>Europe/Moscow</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+      <value-meta>
+        <type>String</type>
+        <storagetype>normal</storagetype>
+        <name>timezone</name>
+        <length>2147483647</length>
+        <precision>-1</precision>
+        <origin>Чтение из таблицы</origin>
+        <comments>timezone</comments>
+        <conversion_Mask/>
         <decimal_symbol>,</decimal_symbol>
         <grouping_symbol> </grouping_symbol>
         <currency_symbol/>
@@ -789,7 +918,104 @@ from bookings.ticket_flights</sql>
     </remotesteps>
     <GUI>
       <xloc>96</xloc>
-      <yloc>256</yloc>
+      <yloc>224</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>Широта и долгота в рамках мировых координат</name>
+    <type>FilterRows</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <send_true_to>Запись в таблицу</send_true_to>
+    <send_false_to>Text file output</send_false_to>
+    <compare>
+      <condition>
+        <negated>N</negated>
+        <conditions>
+          <condition>
+            <negated>N</negated>
+            <leftvalue>latitude</leftvalue>
+            <function>&gt;=</function>
+            <rightvalue/>
+            <value>
+              <name>constant</name>
+              <type>Number</type>
+              <text>-90.0</text>
+              <length>-1</length>
+              <precision>-1</precision>
+              <isnull>N</isnull>
+              <mask>####0.0#########;-####0.0#########</mask>
+            </value>
+          </condition>
+          <condition>
+            <negated>N</negated>
+            <operator>AND</operator>
+            <leftvalue>latitude</leftvalue>
+            <function>&lt;=</function>
+            <rightvalue/>
+            <value>
+              <name>constant</name>
+              <type>Number</type>
+              <text>90.0</text>
+              <length>-1</length>
+              <precision>-1</precision>
+              <isnull>N</isnull>
+              <mask>####0.0#########;-####0.0#########</mask>
+            </value>
+          </condition>
+          <condition>
+            <negated>N</negated>
+            <operator>AND</operator>
+            <leftvalue>longitude</leftvalue>
+            <function>&gt;=</function>
+            <rightvalue/>
+            <value>
+              <name>constant</name>
+              <type>Number</type>
+              <text>-180.0</text>
+              <length>-1</length>
+              <precision>-1</precision>
+              <isnull>N</isnull>
+              <mask>####0.0#########;-####0.0#########</mask>
+            </value>
+          </condition>
+          <condition>
+            <negated>N</negated>
+            <operator>AND</operator>
+            <leftvalue>longitude</leftvalue>
+            <function>&lt;=</function>
+            <rightvalue/>
+            <value>
+              <name>constant</name>
+              <type>Number</type>
+              <text>180.0</text>
+              <length>-1</length>
+              <precision>-1</precision>
+              <isnull>N</isnull>
+              <mask>####0.0#########;-####0.0#########</mask>
+            </value>
+          </condition>
+        </conditions>
+      </condition>
+    </compare>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>544</xloc>
+      <yloc>320</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
