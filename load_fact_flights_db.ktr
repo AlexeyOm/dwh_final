@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transformation>
   <info>
-    <name>load_fact_flights</name>
+    <name>load_fact_flights_db</name>
     <description/>
     <extended_description/>
     <trans_version/>
@@ -489,7 +489,7 @@
   </connection>
   <order>
     <hop>
-      <from>Table input</from>
+      <from>Денормализируем данные по билетам, перелётам</from>
       <to>Ищем пассажира</to>
       <enabled>Y</enabled>
     </hop>
@@ -529,13 +529,18 @@
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>Прилёт позже отлёта</from>
-      <to>Запись в файл</to>
+      <from>Берём измерение пассажиров их БД</from>
+      <to>Ищем пассажира</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>CSV file input</from>
-      <to>Ищем пассажира</to>
+      <from>Прилёт позже отлёта</from>
+      <to>Table output</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Прилёт позже отлёта</from>
+      <to>Text file output 2</to>
       <enabled>Y</enabled>
     </hop>
   </order>
@@ -571,7 +576,7 @@
     </GUI>
   </step>
   <step>
-    <name>Table input</name>
+    <name>Денормализируем данные по билетам, перелётам</name>
     <type>TableInput</type>
     <description/>
     <distribute>Y</distribute>
@@ -868,239 +873,8 @@ where f.actual_departure is not null;</sql>
       </output>
     </remotesteps>
     <GUI>
-      <xloc>96</xloc>
-      <yloc>272</yloc>
-      <draw>Y</draw>
-    </GUI>
-  </step>
-  <step>
-    <name>Ищем пассажира</name>
-    <type>StreamLookup</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <from>CSV file input</from>
-    <input_sorted>N</input_sorted>
-    <preserve_memory>Y</preserve_memory>
-    <sorted_list>N</sorted_list>
-    <integer_pair>N</integer_pair>
-    <lookup>
-      <key>
-        <name>ticket_no</name>
-        <field>ticket_no</field>
-      </key>
-      <value>
-        <name>pax_id</name>
-        <rename>pax_id</rename>
-        <default/>
-        <type>None</type>
-      </value>
-    </lookup>
-    <attributes/>
-    <cluster_schema/>
-    <remotesteps>
-      <input>
-      </input>
-      <output>
-      </output>
-    </remotesteps>
-    <GUI>
-      <xloc>256</xloc>
-      <yloc>208</yloc>
-      <draw>Y</draw>
-    </GUI>
-  </step>
-  <step>
-    <name>Запись в файл</name>
-    <type>TextFileOutput</type>
-    <description/>
-    <distribute>Y</distribute>
-    <custom_distribution/>
-    <copies>1</copies>
-    <partitioning>
-      <method>none</method>
-      <schema_name/>
-    </partitioning>
-    <separator>;</separator>
-    <enclosure>"</enclosure>
-    <enclosure_forced>N</enclosure_forced>
-    <enclosure_fix_disabled>N</enclosure_fix_disabled>
-    <header>Y</header>
-    <footer>N</footer>
-    <format>DOS</format>
-    <compression>None</compression>
-    <encoding/>
-    <endedLine/>
-    <fileNameInField>N</fileNameInField>
-    <fileNameField/>
-    <create_parent_folder>Y</create_parent_folder>
-    <file>
-      <name>${Internal.Entry.Current.Directory}/fact_flights</name>
-      <servlet_output>N</servlet_output>
-      <do_not_open_new_file_init>N</do_not_open_new_file_init>
-      <extention>csv</extention>
-      <append>N</append>
-      <split>N</split>
-      <haspartno>N</haspartno>
-      <add_date>N</add_date>
-      <add_time>N</add_time>
-      <SpecifyFormat>N</SpecifyFormat>
-      <date_time_format/>
-      <add_to_result_filenames>Y</add_to_result_filenames>
-      <pad>N</pad>
-      <fast_dump>N</fast_dump>
-      <splitevery/>
-    </file>
-    <fields>
-      <field>
-        <name>actual_departure</name>
-        <type>Timestamp</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>6</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>actual_arrival</name>
-        <type>Timestamp</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>6</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>departure_delay</name>
-        <type>Integer</type>
-        <format>####0;-####0</format>
-        <currency/>
-        <decimal>,</decimal>
-        <group> </group>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>9</length>
-        <precision>0</precision>
-      </field>
-      <field>
-        <name>arrival_delay</name>
-        <type>Integer</type>
-        <format>####0;-####0</format>
-        <currency/>
-        <decimal>,</decimal>
-        <group> </group>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>9</length>
-        <precision>0</precision>
-      </field>
-      <field>
-        <name>aircraft_code</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>3</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>departure_airport</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>3</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>arrival_airport</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>3</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>aircraft_code_1</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>3</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>fare_conditions</name>
-        <type>String</type>
-        <format/>
-        <currency/>
-        <decimal/>
-        <group/>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>10</length>
-        <precision>-1</precision>
-      </field>
-      <field>
-        <name>amount</name>
-        <type>Number</type>
-        <format>####0.0#########;-####0.0#########</format>
-        <currency/>
-        <decimal>,</decimal>
-        <group> </group>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>10</length>
-        <precision>2</precision>
-      </field>
-      <field>
-        <name>pax_id</name>
-        <type>Integer</type>
-        <format>#</format>
-        <currency>руб.</currency>
-        <decimal>,</decimal>
-        <group> </group>
-        <nullif/>
-        <trim_type>none</trim_type>
-        <length>15</length>
-        <precision>0</precision>
-      </field>
-    </fields>
-    <attributes/>
-    <cluster_schema/>
-    <remotesteps>
-      <input>
-      </input>
-      <output>
-      </output>
-    </remotesteps>
-    <GUI>
-      <xloc>1008</xloc>
-      <yloc>128</yloc>
+      <xloc>144</xloc>
+      <yloc>304</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
@@ -1129,7 +903,7 @@ where f.actual_departure is not null;</sql>
     <fileNameField/>
     <create_parent_folder>Y</create_parent_folder>
     <file>
-      <name>${Internal.Entry.Current.Directory}/aircraft_errors</name>
+      <name>${Internal.Entry.Current.Directory}/fact_flights_errors</name>
       <servlet_output>N</servlet_output>
       <do_not_open_new_file_init>N</do_not_open_new_file_init>
       <extention>csv</extention>
@@ -1294,6 +1068,48 @@ where f.actual_departure is not null;</sql>
     </GUI>
   </step>
   <step>
+    <name>Ищем пассажира</name>
+    <type>StreamLookup</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <from>Берём измерение пассажиров их БД</from>
+    <input_sorted>N</input_sorted>
+    <preserve_memory>Y</preserve_memory>
+    <sorted_list>N</sorted_list>
+    <integer_pair>N</integer_pair>
+    <lookup>
+      <key>
+        <name>ticket_no</name>
+        <field>ticket_no</field>
+      </key>
+      <value>
+        <name>pax_id</name>
+        <rename>pax_id</rename>
+        <default/>
+        <type>Integer</type>
+      </value>
+    </lookup>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>256</xloc>
+      <yloc>208</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
     <name>Нашли пассажира в справочнике пассажиров</name>
     <type>FilterRows</type>
     <description/>
@@ -1324,6 +1140,41 @@ where f.actual_departure is not null;</sql>
     </remotesteps>
     <GUI>
       <xloc>560</xloc>
+      <yloc>160</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>Прилёт позже отлёта</name>
+    <type>FilterRows</type>
+    <description/>
+    <distribute>N</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <send_true_to>Text file output 2</send_true_to>
+    <send_false_to>Text file output</send_false_to>
+    <compare>
+      <condition>
+        <negated>N</negated>
+        <leftvalue>actual_arrival</leftvalue>
+        <function>&gt;</function>
+        <rightvalue>actual_departure</rightvalue>
+      </condition>
+    </compare>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>848</xloc>
       <yloc>160</yloc>
       <draw>Y</draw>
     </GUI>
@@ -1373,8 +1224,8 @@ where f.actual_departure is not null;</sql>
     </GUI>
   </step>
   <step>
-    <name>Прилёт позже отлёта</name>
-    <type>FilterRows</type>
+    <name>Берём измерение пассажиров их БД</name>
+    <type>TableInput</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
@@ -1383,16 +1234,66 @@ where f.actual_departure is not null;</sql>
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <send_true_to>Запись в файл</send_true_to>
-    <send_false_to>Text file output</send_false_to>
-    <compare>
-      <condition>
-        <negated>N</negated>
-        <leftvalue>actual_arrival</leftvalue>
-        <function>&gt;</function>
-        <rightvalue>actual_departure</rightvalue>
-      </condition>
-    </compare>
+    <connection>localhost</connection>
+    <sql>SELECT
+  pax_id
+, ticket_no
+FROM bookings.dim_passengers
+</sql>
+    <limit>0</limit>
+    <lookup/>
+    <execute_each_row>N</execute_each_row>
+    <variables_active>N</variables_active>
+    <lazy_conversion_active>N</lazy_conversion_active>
+    <cached_row_meta_active>N</cached_row_meta_active>
+    <row-meta>
+      <value-meta>
+        <type>Integer</type>
+        <storagetype>normal</storagetype>
+        <name>pax_id</name>
+        <length>9</length>
+        <precision>0</precision>
+        <origin>Берём измерение пассажиров их БД</origin>
+        <comments>pax_id</comments>
+        <conversion_Mask>####0;-####0</conversion_Mask>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol> </grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>ru_RU</date_format_locale>
+        <date_format_timezone>Europe/Moscow</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+      <value-meta>
+        <type>String</type>
+        <storagetype>normal</storagetype>
+        <name>ticket_number</name>
+        <length>20</length>
+        <precision>-1</precision>
+        <origin>Берём измерение пассажиров их БД</origin>
+        <comments>ticket_number</comments>
+        <conversion_Mask/>
+        <decimal_symbol>,</decimal_symbol>
+        <grouping_symbol> </grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>ru_RU</date_format_locale>
+        <date_format_timezone>Europe/Moscow</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+    </row-meta>
     <attributes/>
     <cluster_schema/>
     <remotesteps>
@@ -1402,14 +1303,14 @@ where f.actual_departure is not null;</sql>
       </output>
     </remotesteps>
     <GUI>
-      <xloc>848</xloc>
-      <yloc>160</yloc>
+      <xloc>144</xloc>
+      <yloc>96</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
   <step>
-    <name>CSV file input</name>
-    <type>CsvInput</type>
+    <name>Table output</name>
+    <type>TableOutput</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
@@ -1418,42 +1319,63 @@ where f.actual_departure is not null;</sql>
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <filename>${Internal.Entry.Current.Directory}/dim_passengers.csv</filename>
-    <filename_field/>
-    <rownum_field/>
-    <include_filename>N</include_filename>
-    <separator>;</separator>
-    <enclosure>"</enclosure>
-    <header>Y</header>
-    <buffer_size>50000</buffer_size>
-    <lazy_conversion>Y</lazy_conversion>
-    <add_filename_result>N</add_filename_result>
-    <parallel>N</parallel>
-    <newline_possible>N</newline_possible>
-    <format>mixed</format>
-    <encoding/>
+    <connection>localhost</connection>
+    <schema>bookings</schema>
+    <table>fact_flights</table>
+    <commit>1000</commit>
+    <truncate>Y</truncate>
+    <ignore_errors>N</ignore_errors>
+    <use_batch>Y</use_batch>
+    <specify_fields>Y</specify_fields>
+    <partitioning_enabled>N</partitioning_enabled>
+    <partitioning_field/>
+    <partitioning_daily>N</partitioning_daily>
+    <partitioning_monthly>Y</partitioning_monthly>
+    <tablename_in_field>N</tablename_in_field>
+    <tablename_field/>
+    <tablename_in_table>Y</tablename_in_table>
+    <return_keys>N</return_keys>
+    <return_field/>
     <fields>
       <field>
-        <name>ticket_no</name>
-        <type>Integer</type>
-        <format>#</format>
-        <currency>руб.</currency>
-        <decimal>,</decimal>
-        <group> </group>
-        <length>15</length>
-        <precision>0</precision>
-        <trim_type>none</trim_type>
+        <column_name>departure_delay</column_name>
+        <stream_name>departure_delay</stream_name>
       </field>
       <field>
-        <name>pax_id</name>
-        <type>Integer</type>
-        <format>#</format>
-        <currency>руб.</currency>
-        <decimal>,</decimal>
-        <group> </group>
-        <length>15</length>
-        <precision>0</precision>
-        <trim_type>none</trim_type>
+        <column_name>arrival_delay</column_name>
+        <stream_name>arrival_delay</stream_name>
+      </field>
+      <field>
+        <column_name>fare_conditions</column_name>
+        <stream_name>fare_conditions</stream_name>
+      </field>
+      <field>
+        <column_name>pax_id</column_name>
+        <stream_name>pax_id</stream_name>
+      </field>
+      <field>
+        <column_name>departure_fact</column_name>
+        <stream_name>actual_departure</stream_name>
+      </field>
+      <field>
+        <column_name>arrival_fact</column_name>
+        <stream_name>actual_arrival</stream_name>
+      </field>
+      <field>
+        <column_name>aircraft_id</column_name>
+        <stream_name>aircraft_code</stream_name>
+      </field>
+      <field>
+        <column_name>departure_airport_id</column_name>
+        <stream_name>departure_airport</stream_name>
+      </field>
+      <field>
+        <column_name>arrival_airport_id</column_name>
+        <stream_name>arrival_airport</stream_name>
+      </field>
+      <field>
+        <column_name>price</column_name>
+        <stream_name>amount</stream_name>
       </field>
     </fields>
     <attributes/>
@@ -1465,8 +1387,65 @@ where f.actual_departure is not null;</sql>
       </output>
     </remotesteps>
     <GUI>
-      <xloc>112</xloc>
-      <yloc>144</yloc>
+      <xloc>1008</xloc>
+      <yloc>208</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>Text file output 2</name>
+    <type>TextFileOutput</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <separator>;</separator>
+    <enclosure>"</enclosure>
+    <enclosure_forced>N</enclosure_forced>
+    <enclosure_fix_disabled>N</enclosure_fix_disabled>
+    <header>Y</header>
+    <footer>N</footer>
+    <format>DOS</format>
+    <compression>None</compression>
+    <encoding/>
+    <endedLine/>
+    <fileNameInField>N</fileNameInField>
+    <fileNameField/>
+    <create_parent_folder>Y</create_parent_folder>
+    <file>
+      <name>${Internal.Entry.Current.Directory}/fact_flights</name>
+      <servlet_output>N</servlet_output>
+      <do_not_open_new_file_init>N</do_not_open_new_file_init>
+      <extention>csv</extention>
+      <append>N</append>
+      <split>N</split>
+      <haspartno>N</haspartno>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <SpecifyFormat>N</SpecifyFormat>
+      <date_time_format/>
+      <add_to_result_filenames>Y</add_to_result_filenames>
+      <pad>N</pad>
+      <fast_dump>N</fast_dump>
+      <splitevery/>
+    </file>
+    <fields>
+    </fields>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>1008</xloc>
+      <yloc>112</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
