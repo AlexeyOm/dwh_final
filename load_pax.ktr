@@ -520,6 +520,11 @@
     </hop>
     <hop>
       <from>Есть хотя бы один способ связаться с пассажиром</from>
+      <to>Добавление идентификатора пассажира</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>Добавление идентификатора пассажира</from>
       <to>Запись в файл</to>
       <enabled>Y</enabled>
     </hop>
@@ -628,7 +633,7 @@
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <send_true_to>Запись в файл</send_true_to>
+    <send_true_to>Добавление идентификатора пассажира</send_true_to>
     <send_false_to>Text file output</send_false_to>
     <compare>
       <condition>
@@ -969,6 +974,18 @@ from bookings.tickets</sql>
         <length>16</length>
         <precision>-1</precision>
       </field>
+      <field>
+        <name>pax_id</name>
+        <type>Number</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif/>
+        <trim_type>none</trim_type>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
     </fields>
     <attributes/>
     <cluster_schema/>
@@ -979,8 +996,43 @@ from bookings.tickets</sql>
       </output>
     </remotesteps>
     <GUI>
-      <xloc>752</xloc>
-      <yloc>320</yloc>
+      <xloc>832</xloc>
+      <yloc>304</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>Добавление идентификатора пассажира</name>
+    <type>Sequence</type>
+    <description/>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <valuename>pax_id</valuename>
+    <use_database>N</use_database>
+    <connection>localhost</connection>
+    <schema/>
+    <seqname>SEQ_</seqname>
+    <use_counter>Y</use_counter>
+    <counter_name/>
+    <start_at>1</start_at>
+    <increment_by>1</increment_by>
+    <max_value>999999999</max_value>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>736</xloc>
+      <yloc>352</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
