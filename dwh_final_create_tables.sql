@@ -80,3 +80,12 @@ comment on column bookings.dim_airports.city is 'город, в котором или рядом с ко
 comment on column bookings.dim_airports.longitude is 'координаты: долгота аэропорта';
 comment on column bookings.dim_airports.latitude is 'координаты: широта аэропорта';
 comment on column bookings.dim_airports.timezone is 'часовой пояс';
+
+
+drop table if exists bookings.dim_calendar;
+
+create table bookings.dim_calendar (
+	"date" date,
+	day_of_week int,
+	is_day_off bool
+);
